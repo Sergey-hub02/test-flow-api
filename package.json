@@ -1,0 +1,22 @@
+{
+    "name": "test-flow-api",
+    "version": "1.0.0",
+    "description": "API для системы тестирования учащихся TestFlow",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "dist/main.js",
+    "scripts": {
+        "compile": "npx tsc",
+        "dev": "node ./dist/main.js"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.5.0",
+        "typescript": "^6.0.2"
+    },
+    "dependencies": {
+        "express": "^5.2.1",
+        "pg": "^8.20.0"
+    }
+}
