@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express'
+import type { UploadedFile } from 'express-fileupload'
 import { verify } from 'argon2'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
+import path from 'path'
 import dotenv from 'dotenv'
 
 import User from '../entities/User.js'
@@ -152,6 +154,37 @@ export default class UserController {
         try {
             await this._userService.update(guid, user)
             return res.status(200).json({ message: 'Обновление прошло успешно!' })
+        }
+        catch (error: any) {
+            return res.status(500).json({ error: error.message })
+        }
+    }
+
+    public updatePhoto: RequestHandler = async (req, res) => {
+        const guid = req.params.guid as string
+        const user = await this._userService.readOne(guid)
+
+        if (!user) {
+            return res.status(404).json({ error: `Не удалось найти пользователя с guid = ${guid}` })
+        }
+
+        const photoFile = req.files!.photo as UploadedFile
+        const uploadPath = path.join(process.cwd(), `dist/upload/users/${guid}/${photoFile.name}`)
+
+        photoFile.mv(uploadPath, err => {
+            if (err) {
+                return res.status(500).json({ error: err })
+            }
+
+            return
+        })
+
+        const newUser = new User()
+        newUser.photo = uploadPath
+
+        try {
+            await this._userService.update(guid, newUser)
+            return res.status(200).json({ message: 'Обновление фотографии прошло успешно!' })
         }
         catch (error: any) {
             return res.status(500).json({ error: error.message })

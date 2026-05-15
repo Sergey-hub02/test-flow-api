@@ -88,3 +88,20 @@ export const validateBeforeUpdate: RequestHandler = (req, res, next) => {
     next()
     return
 }
+
+export const validateUserRole: (role: string) => RequestHandler = (role: string) => {
+    return (_, res, next) => {
+        const userRole = res.locals.user?.role
+
+        if (!userRole) {
+            return res.status(403).json({ error: 'Доступ запрещён! Не удалось определить роль!' })
+        }
+
+        if (userRole === role) {
+            next()
+            return
+        }
+
+        return res.status(403).json({ error: 'Доступ запрещён! Вы не можете выполнить этот запрос!' })
+    }
+}

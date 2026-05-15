@@ -10,6 +10,7 @@ const userRoutes = (controller: UserController) => {
     router.get('/', controller.getAllUsers)
     router.get('/:guid', controller.getUser)
     router.patch('/:guid', validateBeforeUpdate, controller.updateUser)
+    router.patch('/:guid/photo', controller.updatePhoto)
 
     return router
 }

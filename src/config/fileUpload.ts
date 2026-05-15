@@ -4,7 +4,7 @@ import path from 'path'
 const fileUploadConfig: Options = {
     createParentPath: true,
     useTempFiles: true,
-    tempFileDir: path.join(process.cwd(), 'tmp'),
+    tempFileDir: path.join(process.cwd(), 'dist/tmp'),
     debug: true,
 }
 
