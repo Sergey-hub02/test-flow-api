@@ -52,6 +52,27 @@ export const validateRegisterFields: RequestHandler = (req, res, next) => {
     return
 }
 
+export const validateLogin: RequestHandler = (req, res, next) => {
+    const login = req.body?.login
+    const password = req.body?.password
+
+    const errors = []
+
+    if (!login) {
+        errors.push('Не указан логин!')
+    }
+    if (!password) {
+        errors.push('Не указан пароль!')
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ errors: errors })
+    }
+
+    next()
+    return
+}
+
 export const validateBeforeUpdate: RequestHandler = (req, res, next) => {
     const password = req.body?.password
     const errors = []

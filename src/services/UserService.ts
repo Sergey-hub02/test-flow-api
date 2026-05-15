@@ -61,6 +61,27 @@ export default class UserService {
             where: { guid: guid },
             relations: { role: true },
         })
+
+        return result
+    }
+
+    public readByLogin = async (login: string) => {
+        const result = await this._userRepository.findOne({
+            select: {
+                guid: true,
+                photo: true,
+                lastName: true,
+                firstName: true,
+                secondName: true,
+                login: true,
+                password: true,
+                birthday: true,
+                role: true,
+            },
+            where: { login: login },
+            relations: { role: true },
+        })
+
         return result
     }
 

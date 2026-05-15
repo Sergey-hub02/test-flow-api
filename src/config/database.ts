@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 
 import Role from '../entities/Role.js'
 import User from '../entities/User.js'
+import Token from '../entities/Token.js'
 
 dotenv.config()
 
@@ -13,7 +14,7 @@ const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD as string,
     database: process.env.DB_NAME as string,
     port: process.env.DB_PORT as unknown as number,
-    entities: [Role, User],
+    entities: [Role, User, Token],
     synchronize: true,
 })
 

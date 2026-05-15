@@ -3,12 +3,14 @@ import dotenv from 'dotenv'
 import fileUpload from 'express-fileupload'
 
 import AppDataSource from './config/database.js'
+
 import roleRoutes from './routes/roleRoutes.js'
 import RoleController from './controllers/RoleController.js'
 
 import userRoutes from './routes/userRoutes.js'
 import UserController from './controllers/UserController.js'
 import UserService from './services/UserService.js'
+import TokenService from './services/TokenService.js'
 
 import fileUploadConfig from './config/fileUpload.js'
 
@@ -29,7 +31,8 @@ const main = async () => {
     const app = express()
 
     const userService = new UserService()
-    const userController = new UserController(userService)
+    const tokenService = new TokenService()
+    const userController = new UserController(userService, tokenService)
 
     const roleController = new RoleController()
 
