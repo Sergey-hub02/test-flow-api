@@ -12,6 +12,7 @@
     },
     "devDependencies": {
         "@types/express": "^5.0.6",
+        "@types/express-fileupload": "^1.5.1",
         "@types/node": "^25.5.0",
         "@types/pg": "^8.20.0",
         "typescript": "^6.0.2"
@@ -19,6 +20,7 @@
     "dependencies": {
         "argon2": "^0.44.0",
         "express": "^5.2.1",
+        "express-fileupload": "^1.5.2",
         "pg": "^8.20.0",
         "reflect-metadata": "^0.2.2",
         "typeorm": "^0.3.29"

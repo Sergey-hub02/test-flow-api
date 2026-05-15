@@ -55,6 +55,36 @@ export default class UserController {
 
     public updateUser = async (req: Request, res: Response) => {
         const guid = req.params.guid as string
-        const photo = req.body?.photo
+        const lastName = req.body?.lastName
+        const firstName = req.body?.firstName
+        const secondName = req.body?.secondName
+        const password = req.body?.password
+        const birthday = req.body?.birthday
+
+        const user = new User()
+
+        if (lastName) {
+            user.lastName = lastName
+        }
+        if (firstName) {
+            user.firstName = firstName
+        }
+        if (secondName) {
+            user.secondName = secondName
+        }
+        if (password) {
+            user.password = password
+        }
+        if (birthday) {
+            user.birthday = new Date(birthday)
+        }
+
+        try {
+            await this._userService.update(guid, user)
+            return res.status(200).json({ message: 'Обновление прошло успешно!' })
+        }
+        catch (error) {
+            return res.status(500).json(error)
+        }
     }
 }

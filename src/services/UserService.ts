@@ -71,6 +71,7 @@ export default class UserService {
             throw new Error(`Ошибка при обновлении! Пользователь с guid = ${guid} не существует!`)
         }
 
-        await this._userRepository.update(guid, user)
+        const result = await this._userRepository.update(guid, user)
+        return result.affected
     }
 }

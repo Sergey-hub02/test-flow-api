@@ -2,14 +2,6 @@ import type { RequestHandler } from 'express'
 import { validateEmail } from '../utils/functions.js'
 
 export const validateRegisterFields: RequestHandler = (req, res, next) => {
-    // const {
-    //     lastName,
-    //     firstName,
-    //     login,
-    //     password,
-    //     confirmPassword,
-    //     birthday,
-    // } = req.body
     const lastName = req.body?.lastName
     const firstName = req.body?.firstName
     const login = req.body?.login
@@ -54,6 +46,22 @@ export const validateRegisterFields: RequestHandler = (req, res, next) => {
         return res.status(400).json({
             errors: errors,
         })
+    }
+
+    next()
+    return
+}
+
+export const validateBeforeUpdate: RequestHandler = (req, res, next) => {
+    const password = req.body?.password
+    const errors = []
+
+    if (password && (password.length < 8 || password.length > 20)) {
+        errors.push('Пароль должен содержать от 8 до 20 символов!')
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ errors: errors })
     }
 
     next()
