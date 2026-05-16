@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm'
 
 import Token from '../entities/Token.js'
+import User from '../entities/User.js'
 import AppDataSource from '../config/database.js'
 
 export default class TokenService {
@@ -17,5 +18,13 @@ export default class TokenService {
             accessToken: newToken.accessToken,
             refreshToken: newToken.refreshToken,
         }
+    }
+
+    public deleteByUserGuid = async (userGuid: string) => {
+        const user = new User()
+        user.guid = userGuid
+
+        const result = await this._tokenRepository.delete({ user: user })
+        return result.affected
     }
 }

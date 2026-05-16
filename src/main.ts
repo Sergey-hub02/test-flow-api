@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import fileUpload from 'express-fileupload'
+import path from 'path'
 
 import AppDataSource from './config/database.js'
 
@@ -36,9 +37,13 @@ const main = async () => {
 
     const roleController = new RoleController()
 
+    const distPath = path.join(process.cwd(), 'dist')
+    const uploadPath = path.join(distPath, 'upload')
+
     app.use(express.json())
     app.use(fileUpload(fileUploadConfig))
 
+    app.use('/upload', express.static(uploadPath))
     app.use('/api/v1/users', userRoutes(userController))
     app.use('/api/v1/roles', roleRoutes(roleController))
 

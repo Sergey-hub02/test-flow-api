@@ -41,9 +41,60 @@ export default class UserController {
         user.password = password
         user.birthday = new Date(birthday)
 
+        let newUser: User
+
         try {
-            const userGuid = await this._userService.create(user)
-            return res.status(201).json({ userGuid: userGuid })
+            newUser = await this._userService.create(user)
+        }
+        catch (error: any) {
+            return res.status(500).json({ errors: [error.message] })
+        }
+
+        const payload: JwtPayload = {
+            sub: newUser.guid,
+            lastName: lastName,
+            firstName: firstName,
+            secondName: secondName,
+            birthday: birthday,
+            role: newUser.role.code,
+        }
+        const accessExpiresAt = new Date()
+        accessExpiresAt.setDate(accessExpiresAt.getDate() + 1)
+
+        const refreshExpiresAt = new Date()
+        refreshExpiresAt.setMonth(refreshExpiresAt.getMonth() + 2)
+
+        const accessToken = jwt.sign(
+            payload,
+            process.env.JWT_ACCESS_PRIVATE_KEY as string,
+            { expiresIn: accessExpiresAt.getSeconds() }
+        )
+
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_PRIVATE_KEY as string,
+            { expiresIn: refreshExpiresAt.getSeconds() }
+        )
+
+        const token = new Token()
+
+        token.user = newUser
+        token.accessToken = accessToken
+        token.expiresAt = accessExpiresAt
+        token.refreshToken = refreshToken
+        token.refreshExpiresAt = refreshExpiresAt
+
+        try {
+            await this._tokenService.create(token)
+
+            res.cookie('accessJWT', accessToken, { expires: accessExpiresAt })
+            res.cookie('refreshJWT', refreshToken, { expires: refreshExpiresAt })
+
+            return res.status(200).json({
+                user: newUser.guid,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+            })
         }
         catch (error: any) {
             return res.status(500).json({ errors: [error.message] })
@@ -63,6 +114,8 @@ export default class UserController {
         if (!(await verify(hashedPassword, password))) {
             return res.status(403).json({ errors: ['Неправильный логин или пароль!'] })
         }
+
+        await this._tokenService.deleteByUserGuid(foundUser.guid)
 
         const payload: JwtPayload = {
             sub: foundUser.guid,
@@ -102,10 +155,30 @@ export default class UserController {
 
         try {
             const newToken = await this._tokenService.create(token)
+
+            res.cookie('accessJWT', accessToken, { expires: accessExpiresAt })
+            res.cookie('refreshJWT', refreshToken, { expires: refreshExpiresAt })
+
             return res.status(200).json(newToken)
         }
         catch (error: any) {
             return res.status(500).json({ errors: [error.message] })
+        }
+    }
+
+    public logout: RequestHandler = async (req, res) => {
+        const guid = req.params.guid as string
+
+        try {
+            await this._tokenService.deleteByUserGuid(guid)
+
+            res.clearCookie('accessJWT')
+            res.clearCookie('refreshJWT')
+
+            return res.status(200).json({ message: 'Токены успешно удалены!' })
+        }
+        catch (error) {
+            return res.status(500).json({ error: (error as Error).message })
         }
     }
 
@@ -134,6 +207,7 @@ export default class UserController {
         const birthday = req.body?.birthday
 
         const user = new User()
+        user.guid = guid
 
         if (lastName) {
             user.lastName = lastName
@@ -151,12 +225,62 @@ export default class UserController {
             user.birthday = new Date(birthday)
         }
 
+        let updatedUser: User
+
         try {
-            await this._userService.update(guid, user)
-            return res.status(200).json({ message: 'Обновление прошло успешно!' })
+            updatedUser = (await this._userService.update(guid, user)) as User
         }
         catch (error: any) {
             return res.status(500).json({ error: error.message })
+        }
+
+        await this._tokenService.deleteByUserGuid(guid)
+
+        const payload: JwtPayload = {
+            sub: guid,
+            lastName: updatedUser.lastName,
+            firstName: updatedUser.firstName,
+            secondName: updatedUser.secondName,
+            birthday: updatedUser.birthday,
+            role: updatedUser.role.code,
+        }
+
+        const accessExpiresAt = new Date()
+        accessExpiresAt.setDate(accessExpiresAt.getDate() + 1)
+
+        const refreshExpiresAt = new Date()
+        refreshExpiresAt.setMonth(refreshExpiresAt.getMonth() + 2)
+
+        const accessToken = jwt.sign(
+            payload,
+            process.env.JWT_ACCESS_PRIVATE_KEY as string,
+            { expiresIn: accessExpiresAt.getSeconds() }
+        )
+
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_PRIVATE_KEY as string,
+            { expiresIn: refreshExpiresAt.getSeconds() }
+        )
+
+        const token = new Token()
+
+        token.user = updatedUser
+        token.accessToken = accessToken
+        token.expiresAt = accessExpiresAt
+        token.refreshToken = refreshToken
+        token.refreshExpiresAt = refreshExpiresAt
+
+        try {
+            await this._tokenService.create(token)
+
+            res.cookie('accessJWT', accessToken, { expires: accessExpiresAt })
+            res.cookie('refreshJWT', refreshToken, { expires: refreshExpiresAt })
+
+            return res.status(200).json({ message: 'Обновление прошло успешно!' })
+        }
+        catch (error: any) {
+            return res.status(500).json({ errors: [error.message] })
         }
     }
 
@@ -169,9 +293,10 @@ export default class UserController {
         }
 
         const photoFile = req.files!.photo as UploadedFile
-        const uploadPath = path.join(process.cwd(), `dist/upload/users/${guid}/${photoFile.name}`)
+        const uploadPath = `/upload/users/${guid}/${photoFile.name}`
+        const uploadPathFull = path.join(process.cwd(), 'dist', uploadPath)
 
-        photoFile.mv(uploadPath, err => {
+        photoFile.mv(uploadPathFull, err => {
             if (err) {
                 return res.status(500).json({ error: err })
             }
@@ -182,12 +307,63 @@ export default class UserController {
         const newUser = new User()
         newUser.photo = uploadPath
 
+        let updatedUser: User
+
         try {
-            await this._userService.update(guid, newUser)
-            return res.status(200).json({ message: 'Обновление фотографии прошло успешно!' })
+            updatedUser = (await this._userService.update(guid, newUser)) as User
         }
         catch (error: any) {
             return res.status(500).json({ error: error.message })
+        }
+
+        await this._tokenService.deleteByUserGuid(guid)
+
+        const payload: JwtPayload = {
+            sub: guid,
+            photo: uploadPath,
+            lastName: updatedUser.lastName,
+            firstName: updatedUser.firstName,
+            secondName: updatedUser.secondName,
+            birthday: updatedUser.birthday,
+            role: updatedUser.role.code,
+        }
+
+        const accessExpiresAt = new Date()
+        accessExpiresAt.setDate(accessExpiresAt.getDate() + 1)
+
+        const refreshExpiresAt = new Date()
+        refreshExpiresAt.setMonth(refreshExpiresAt.getMonth() + 2)
+
+        const accessToken = jwt.sign(
+            payload,
+            process.env.JWT_ACCESS_PRIVATE_KEY as string,
+            { expiresIn: accessExpiresAt.getSeconds() }
+        )
+
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_PRIVATE_KEY as string,
+            { expiresIn: refreshExpiresAt.getSeconds() }
+        )
+
+        const token = new Token()
+
+        token.user = updatedUser
+        token.accessToken = accessToken
+        token.expiresAt = accessExpiresAt
+        token.refreshToken = refreshToken
+        token.refreshExpiresAt = refreshExpiresAt
+
+        try {
+            await this._tokenService.create(token)
+
+            res.cookie('accessJWT', accessToken, { expires: accessExpiresAt })
+            res.cookie('refreshJWT', refreshToken, { expires: refreshExpiresAt })
+
+            return res.status(200).json({ message: 'Обновление фотографии прошло успешно!' })
+        }
+        catch (error: any) {
+            return res.status(500).json({ errors: [error.message] })
         }
     }
 }

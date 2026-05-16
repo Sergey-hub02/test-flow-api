@@ -33,7 +33,7 @@ export default class UserService {
         })
 
         const savedUser = await this._userRepository.save(newUser)
-        return savedUser.guid
+        return savedUser
     }
 
     public readAll = async () => {
@@ -92,7 +92,11 @@ export default class UserService {
             throw new Error(`Ошибка при обновлении! Пользователь с guid = ${guid} не существует!`)
         }
 
-        const result = await this._userRepository.update(guid, user)
-        return result.affected
+        await this._userRepository.update(guid, user)
+
+        return await this._userRepository.findOne({
+            where: { guid: guid },
+            relations: { role: true },
+        })
     }
 }
