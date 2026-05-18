@@ -2,6 +2,7 @@ import { hash } from 'argon2'
 import AppDataSource from '../config/database.js'
 import User from '../entities/User.js'
 import Role from '../entities/Role.js'
+import Discipline from '../entities/Discipline.js'
 
 export default class UserService {
     private _userRepository = AppDataSource.getRepository(User)
@@ -59,7 +60,7 @@ export default class UserService {
     public readOne = async (guid: string) => {
         const result = await this._userRepository.findOne({
             where: { guid: guid },
-            relations: { role: true },
+            relations: { role: true, disciplines: true },
         })
 
         return result
@@ -96,7 +97,31 @@ export default class UserService {
 
         return await this._userRepository.findOne({
             where: { guid: guid },
-            relations: { role: true },
+            relations: { role: true, disciplines: true },
+        })
+    }
+
+    public addDiscipline = async (user: User, discipline: Discipline) => {
+        const newUser = this._userRepository.create(user)
+        newUser.disciplines.push(discipline)
+
+        await this._userRepository.save(newUser)
+
+        return await this._userRepository.findOne({
+            where: { guid: user.guid },
+            relations: { role: true, disciplines: true },
+        })
+    }
+
+    public removeDiscipline = async (user: User, discipline: Discipline) => {
+        const newUser = this._userRepository.create(user)
+        newUser.disciplines = newUser.disciplines.filter(disc => disc.guid !== discipline.guid)
+
+        await this._userRepository.save(newUser)
+
+        return await this._userRepository.findOne({
+            where: { guid: user.guid },
+            relations: { role: true, disciplines: true },
         })
     }
 }

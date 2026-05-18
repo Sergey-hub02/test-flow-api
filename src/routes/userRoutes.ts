@@ -8,6 +8,8 @@ const userRoutes = (controller: UserController) => {
     router.post('/', validateRegisterFields, controller.register)
     router.post('/auth', validateLogin, controller.login)
     router.post('/logout/:guid', controller.logout)
+    router.post('/disciplines', controller.addDiscipline)
+    router.delete('/disciplines', controller.removeDiscipline)
     router.get('/', controller.getAllUsers)
     router.get('/:guid', controller.getUser)
     router.patch('/:guid', validateBeforeUpdate, controller.updateUser)

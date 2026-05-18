@@ -11,15 +11,19 @@ import UserService from '../services/UserService.js'
 import Token from '../entities/Token.js'
 import TokenService from '../services/TokenService.js'
 
+import DisciplineService from '../services/DisciplineService.js'
+
 dotenv.config()
 
 export default class UserController {
     private _userService: UserService
     private _tokenService: TokenService
+    private _disciplineService: DisciplineService
 
-    public constructor(userService: UserService, tokenService: TokenService) {
+    public constructor(userService: UserService, tokenService: TokenService, disciplineService: DisciplineService) {
         this._userService = userService
         this._tokenService = tokenService
+        this._disciplineService = disciplineService
     }
 
     public register: RequestHandler = async (req, res) => {
@@ -364,6 +368,54 @@ export default class UserController {
         }
         catch (error: any) {
             return res.status(500).json({ errors: [error.message] })
+        }
+    }
+
+    public addDiscipline: RequestHandler = async (req, res) => {
+        const userGuid = req.body?.userGuid
+        const discGuid = req.body?.disciplineGuid
+
+        const user = await this._userService.readOne(userGuid)
+        const discipline = await this._disciplineService.readOne(discGuid)
+
+        if (!user) {
+            return res.status(404).json({ error: `Пользователь с guid = ${userGuid} не существует!` })
+        }
+
+        if (!discipline) {
+            return res.status(404).json({ error: `Дисциплина с guid = ${discGuid} не существует!` })
+        }
+
+        try {
+            await this._userService.addDiscipline(user, discipline)
+            return res.status(200).json({ message: 'Пользователь успешно записался на дисциплину!' })
+        }
+        catch (error) {
+            return res.status(500).json({ error: (error as Error).message })
+        }
+    }
+
+    public removeDiscipline: RequestHandler = async (req, res) => {
+        const userGuid = req.body?.userGuid
+        const discGuid = req.body?.disciplineGuid
+
+        const user = await this._userService.readOne(userGuid)
+        const discipline = await this._disciplineService.readOne(discGuid)
+
+        if (!user) {
+            return res.status(404).json({ error: `Пользователь с guid = ${userGuid} не существует!` })
+        }
+
+        if (!discipline) {
+            return res.status(404).json({ error: `Дисциплина с guid = ${discGuid} не существует!` })
+        }
+
+        try {
+            await this._userService.removeDiscipline(user, discipline)
+            return res.status(200).json({ message: 'Пользователь успешно удалил дисциплину из своего списка!' })
+        }
+        catch (error) {
+            return res.status(500).json({ error: (error as Error).message })
         }
     }
 }

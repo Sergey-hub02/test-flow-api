@@ -1,6 +1,7 @@
 import 'reflect-metadata'
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import Role from './Role.js'
+import Discipline from './Discipline.js'
 
 @Entity()
 export default class User {
@@ -30,6 +31,10 @@ export default class User {
 
     @ManyToOne(() => Role)
     public role: Role
+
+    @ManyToMany(() => Discipline)
+    @JoinTable()
+    public disciplines: Discipline[]
 
     @CreateDateColumn()
     public createdAt: Date

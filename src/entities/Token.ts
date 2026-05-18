@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import User from './User.js'
 
