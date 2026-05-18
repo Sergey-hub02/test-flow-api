@@ -32,7 +32,7 @@ export default class User {
     @ManyToOne(() => Role)
     public role: Role
 
-    @ManyToMany(() => Discipline)
+    @ManyToMany(() => Discipline, discipline => discipline.users)
     @JoinTable()
     public disciplines: Discipline[]
 

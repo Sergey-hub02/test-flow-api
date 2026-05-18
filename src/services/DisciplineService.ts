@@ -36,7 +36,10 @@ export default class DisciplineService {
     }
 
     public readOne = async (guid: string) => {
-        const discipline = await this._disciplineRepository.findOneBy({ guid })
+        const discipline = await this._disciplineRepository.findOne({
+            where: { guid: guid },
+            relations: ['tests', 'users', 'users.role'],
+        })
         return discipline
     }
 
@@ -57,6 +60,25 @@ export default class DisciplineService {
             .getMany()
 
         return disciplines
+    }
+
+    public getTests = async (guid: string) => {
+        const discipline = await this._disciplineRepository.findOne({
+            select: {
+                tests: {
+                    guid: true,
+                    name: true,
+                },
+            },
+            where: { guid: guid },
+            relations: { tests: true },
+        })
+
+        if (!discipline) {
+            throw new Error(`Дисциплина с guid = ${guid} не существуте!`)
+        }
+
+        return discipline.tests
     }
 
     public update = async (guid: string, discipline: Discipline) => {

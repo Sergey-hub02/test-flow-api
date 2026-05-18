@@ -45,6 +45,18 @@ export default class DisciplineController {
         return res.status(200).json(discipline)
     }
 
+    public getTests: RequestHandler = async (req, res) => {
+        const guid = req.params.guid as string
+
+        try {
+            const tests = await this._disciplineService.getTests(guid)
+            return res.status(200).json(tests)
+        }
+        catch (error) {
+            return res.status(500).json({ error: (error as Error).message })
+        }
+    }
+
     public getAvailableDisciplines: RequestHandler = async (req, res) => {
         const userGuid = req.params.userGuid as string
         const disciplines = await this._disciplineService.readAvailable(userGuid)

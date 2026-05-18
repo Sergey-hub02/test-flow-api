@@ -17,6 +17,10 @@ import disciplineRoutes from './routes/disciplineRoutes.js'
 import DisciplineController from './controllers/DisciplineController.js'
 import DisciplineService from './services/DisciplineService.js'
 
+import testRoutes from './routes/testRoutes.js'
+import TestController from './controllers/TestController.js'
+import TestService from './services/TestService.js'
+
 import fileUploadConfig from './config/fileUpload.js'
 
 dotenv.config()
@@ -44,6 +48,9 @@ const main = async () => {
     const userController = new UserController(userService, tokenService, disciplineService)
     const roleController = new RoleController()
 
+    const testService = new TestService()
+    const testController = new TestController(testService)
+
     const distPath = path.join(process.cwd(), 'dist')
     const uploadPath = path.join(distPath, 'upload')
 
@@ -54,6 +61,7 @@ const main = async () => {
     app.use('/api/v1/users', userRoutes(userController))
     app.use('/api/v1/roles', roleRoutes(roleController))
     app.use('/api/v1/disciplines', disciplineRoutes(disciplineController))
+    app.use('/api/v1/tests', testRoutes(testController))
 
     app.listen(PORT, () => {
         console.log(`Приложение запущено на порте ${PORT}`)
