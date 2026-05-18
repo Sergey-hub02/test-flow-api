@@ -371,6 +371,18 @@ export default class UserController {
         }
     }
 
+    public getUserDisciplines: RequestHandler = async (req, res) => {
+        const guid = req.params.guid as string
+
+        try {
+            const disciplines = await this._userService.getDisciplines(guid)
+            return res.status(200).json(disciplines)
+        }
+        catch (error) {
+            return res.status(500).json({ error: (error as Error).message })
+        }
+    }
+
     public addDiscipline: RequestHandler = async (req, res) => {
         const userGuid = req.body?.userGuid
         const discGuid = req.body?.disciplineGuid

@@ -101,6 +101,19 @@ export default class UserService {
         })
     }
 
+    public getDisciplines = async (guid: string) => {
+        const user = await this._userRepository.findOne({
+            where: { guid: guid },
+            relations: { role: true, disciplines: true },
+        })
+
+        if (!user) {
+            throw new Error(`Пользователь с guid = ${guid} не существует!`)
+        }
+
+        return user.disciplines
+    }
+
     public addDiscipline = async (user: User, discipline: Discipline) => {
         const newUser = this._userRepository.create(user)
         newUser.disciplines.push(discipline)

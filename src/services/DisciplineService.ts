@@ -40,6 +40,25 @@ export default class DisciplineService {
         return discipline
     }
 
+    public readAvailable = async (userGuid: string) => {
+        const disciplines = await this._disciplineRepository
+            .createQueryBuilder('d')
+            .select(['d.guid', 'd.photo', 'd.name', 'd.description'])
+            .where(qb => {
+                const subQuery = qb
+                    .subQuery()
+                    .select('udd.disciplineGuid')
+                    .from('user_disciplines_discipline', 'udd')
+                    .where('udd.userGuid = :userGuid', { userGuid })
+                    .getQuery()
+
+                return 'd.guid NOT IN ' + subQuery
+            })
+            .getMany()
+
+        return disciplines
+    }
+
     public update = async (guid: string, discipline: Discipline) => {
         const existingDiscipline = await this._disciplineRepository.existsBy({ guid })
 

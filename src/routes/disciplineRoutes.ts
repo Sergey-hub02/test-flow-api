@@ -7,6 +7,7 @@ const disciplineRoutes = (controller: DisciplineController) => {
     router.post('/', controller.createDiscipline)
     router.get('/', controller.getAllDisciplines)
     router.get('/:guid', controller.getDiscipline)
+    router.get('/available/:userGuid', controller.getAvailableDisciplines)
     router.patch('/:guid', controller.updateDiscipline)
     router.patch('/:guid/photo', controller.uploadDisciplinePhoto)
 

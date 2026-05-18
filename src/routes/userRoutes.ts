@@ -12,6 +12,7 @@ const userRoutes = (controller: UserController) => {
     router.delete('/disciplines', controller.removeDiscipline)
     router.get('/', controller.getAllUsers)
     router.get('/:guid', controller.getUser)
+    router.get('/:guid/disciplines', controller.getUserDisciplines)
     router.patch('/:guid', validateBeforeUpdate, controller.updateUser)
     router.patch('/:guid/photo', controller.updatePhoto)
 

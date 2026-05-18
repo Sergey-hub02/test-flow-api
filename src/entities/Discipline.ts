@@ -1,5 +1,6 @@
 import 'reflect-metadata'
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import User from './User.js'
 
 @Entity()
 export default class Discipline {
@@ -14,6 +15,9 @@ export default class Discipline {
 
     @Column('text')
     public description: string
+
+    @ManyToMany(() => User, user => user.disciplines)
+    public users: User[]
 
     @CreateDateColumn()
     public createdAt: Date

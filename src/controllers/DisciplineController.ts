@@ -45,6 +45,12 @@ export default class DisciplineController {
         return res.status(200).json(discipline)
     }
 
+    public getAvailableDisciplines: RequestHandler = async (req, res) => {
+        const userGuid = req.params.userGuid as string
+        const disciplines = await this._disciplineService.readAvailable(userGuid)
+        return res.status(200).json(disciplines)
+    }
+
     public updateDiscipline: RequestHandler = async (req, res) => {
         const guid = req.params.guid as string
         const name = req.body?.name
