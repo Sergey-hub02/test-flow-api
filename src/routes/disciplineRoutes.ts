@@ -9,6 +9,7 @@ const disciplineRoutes = (controller: DisciplineController) => {
     router.get('/:guid', controller.getDiscipline)
     router.get('/available/:userGuid', controller.getAvailableDisciplines)
     router.get('/:guid/tests', controller.getTests)
+    router.get('/:guid/tests/:testGuid', controller.getTest)
     router.patch('/:guid', controller.updateDiscipline)
     router.patch('/:guid/photo', controller.uploadDisciplinePhoto)
 

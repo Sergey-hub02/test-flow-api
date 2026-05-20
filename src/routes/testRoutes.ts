@@ -6,6 +6,7 @@ const testRoutes = (controller: TestController) => {
 
     router.post('/', controller.createTest)
     router.get('/', controller.getAllTests)
+    router.get('/:guid', controller.getTest)
 
     return router
 }

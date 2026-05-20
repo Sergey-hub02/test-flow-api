@@ -1,6 +1,9 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn, type Relation } from 'typeorm'
+import 'reflect-metadata'
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, type Relation } from 'typeorm'
 import Discipline from './Discipline.js'
 import User from './User.js'
+import Problem from './Problem.js'
+import Attempt from './Attempt.js'
 
 @Entity()
 export default class Test {
@@ -24,6 +27,12 @@ export default class Test {
 
     @ManyToOne(() => User, { nullable: false })
     public author: Relation<User>
+
+    @OneToMany(() => Problem, problem => problem.test)
+    public problems: Problem[]
+
+    @OneToMany(() => Attempt, attempt => attempt.test)
+    public attempts: Attempt[]
 
     @CreateDateColumn()
     public createdAt: Date

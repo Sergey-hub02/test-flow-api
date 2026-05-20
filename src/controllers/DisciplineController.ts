@@ -4,12 +4,15 @@ import path from 'path'
 
 import DisciplineService from '../services/DisciplineService.js'
 import Discipline from '../entities/Discipline.js'
+import TestService from '../services/TestService.js'
 
 export default class DisciplineController {
     private _disciplineService: DisciplineService
+    private _testService: TestService
 
-    public constructor(disciplineService: DisciplineService) {
+    public constructor(disciplineService: DisciplineService, testService: TestService) {
         this._disciplineService = disciplineService
+        this._testService = testService
     }
 
     public createDiscipline: RequestHandler = async (req, res) => {
@@ -55,6 +58,18 @@ export default class DisciplineController {
         catch (error) {
             return res.status(500).json({ error: (error as Error).message })
         }
+    }
+
+    public getTest: RequestHandler = async (req, res) => {
+        const guid = req.params.guid as string
+        const testGuid = req.params.testGuid as string
+        const test = await this._testService.readByDisciplineAndTest(guid, testGuid)
+
+        if (!test) {
+            return res.status(404).json({ error: `Тест guid = ${testGuid} для дисциплины guid = ${guid} не найден!`})
+        }
+
+        return res.status(200).json(test)
     }
 
     public getAvailableDisciplines: RequestHandler = async (req, res) => {

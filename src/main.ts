@@ -42,14 +42,14 @@ const main = async () => {
     const userService = new UserService()
     const tokenService = new TokenService()
 
+    const testService = new TestService()
+    const testController = new TestController(testService)
+
     const disciplineService = new DisciplineService()
-    const disciplineController = new DisciplineController(disciplineService)
+    const disciplineController = new DisciplineController(disciplineService, testService)
 
     const userController = new UserController(userService, tokenService, disciplineService)
     const roleController = new RoleController()
-
-    const testService = new TestService()
-    const testController = new TestController(testService)
 
     const distPath = path.join(process.cwd(), 'dist')
     const uploadPath = path.join(distPath, 'upload')
